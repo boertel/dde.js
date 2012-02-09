@@ -13,8 +13,8 @@ var dde = {
         }
         
         if (this.commons !== undefined ) {
-            args.settings = this.merge(this.commons, args.settings)
-        };
+            args.settings = this.merge(this.commons, args.settings);
+        }
 
         if (document.location.search.length > 0) {
             var search = this.jsonify(document.location.search.replace("?", ""));
@@ -43,7 +43,7 @@ var dde = {
     merge: function (obj1, obj2) {
         var obj3 = {};
         for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
-        for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+        for (attrname in obj2) { obj3[attrname] = obj2[attrname]; }
         return obj3;
     },
     jsonify: function (message) {
