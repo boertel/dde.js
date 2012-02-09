@@ -3,43 +3,60 @@
  * Date: 01/01/2012
  */
 
-/*
- * TODO:
- *  - async
- *  - auto run
- */
-
 var dde = {
-    environments: {},
-    current: {},
+    environment: {},
 
-    push: function (domain, name, settings) {
+    push: function (args) {
         var default_values = [false, '', 'default', '*'];
-        if (default_values.indexOf(domain) !== -1) {
-            domain = 'default';
+        if (default_values.indexOf(args.host) !== -1) {
+            args.host = "default";
         }
-        this.environments[domain] = {domain: domain, name: name, settings: settings};
+        
+        if (this.commons !== undefined ) {
+            args.settings = this.merge(this.commons, args.settings)
+        };
+
+        if (document.location.search.length > 0) {
+            var search = this.jsonify(document.location.search.replace("?", ""));
+            args.settings = this.merge(args.settings, search);
+        }
+
+        this.environment[args.host] = {
+            host: args.host,
+            name: args.name || args.host,
+            settings: args.settings
+        };
     },
-    defaultRunCallback: function (data, callback) {
-        // use dde because we are in a callback function
-        dde.current = data;
-        callback && callback(data);
-    },
-    run: function (callback, current) {
-        if (!callback) {
-            callback = this.defaultRunCallback;
-        }
-        // by default, run the default callback
-        if (current !== false) {
-            oldCallback = callback;
-            callback = function (data) { dde.defaultRunCallback(data, oldCallback); };
-        }
+    work: function (callback) {
         var host = document.location.host;
-        if (this.environments[host] !== undefined) {
-            callback(this.environments[host]);
+        var env;
+
+        if (this.environment[host] !== undefined) {
+            env = this.environment[host];
         } else {
-            callback(this.environments['default']);
+            env = this.environment["default"];
         }
+
+        dde.env = env;
+        return env;
+    },
+    merge: function (obj1, obj2) {
+        var obj3 = {};
+        for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+        for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+        return obj3;
+    },
+    jsonify: function (message) {
+        var data = {};
+        var d = message.split("&");
+        var pair, key, value;
+        for (var i = 0, len = d.length; i < len; i++) {
+            pair = d[i];
+            key = pair.substring(0, pair.indexOf("="));
+            value = pair.substring(key.length + 1);
+            data[key] = unescape(value);
+        }
+        return data;
     },
     log: function (args) {
         if (window.console) {
@@ -47,20 +64,4 @@ var dde = {
         }
     }
 };
-/*
-DDE.push('127.0.0.1', 'dev', {
-    web: 'http://127.0.0.1',
-    facebook_app_id: '219311311484213',
-    publishing: true,
-    logging: true
-});
-// default environment
-DDE.push('*', 'prod', {
-    web: 'http://medaille-boertel.dotcloud.com',
-    facebook_app_id: '238768499521270',
-    publishing: true,
-    logging: false
-});
-
-DDE.run();
-*/
+window.ddeAsyncInit && window.ddeAsyncInit();

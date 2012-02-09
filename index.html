@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+	<title></title>
+</head>
+
+<body>
+
+<div id="giveaway"></div>
+
+<script type="text/javascript">
+window.ddeAsyncInit = function () {
+    dde.commons = {
+        display: "tab",
+        language: "fr-fr"
+    };
+
+    dde.push({
+        host: "127.0.0.1",
+        name: "dev",
+        settings: {
+            key: "abcdef",
+            domain: "127.0.0.1"
+        }
+    });
+    dde.push({
+        host: "test.punchtab.com",
+        name: "test",
+        settings: {
+            key: "ghijkl",
+            domain: "test.punchtab.com",
+            display: "inline"
+        }
+    });
+    dde.push({
+        host: "*",
+        name: "prod",
+        settings: {
+            key: "",
+            domain: "punchtab.com"
+        }
+    });
+
+    var env = dde.work();
+    console.log(dde);
+};
+
+(function() {
+    var dde = document.createElement('script'); dde.type = 'text/javascript'; dde.async = true;
+    dde.src = "./dde.js";
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(dde, s);
+})();
+</script>
+
+</body>
+</html>
+
