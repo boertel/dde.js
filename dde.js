@@ -2,6 +2,9 @@
  * Description: match a specific host with a specific configuration
  * Date: 01/01/2012
  */
+
+/*jslint browser: true, undef: false, evil: false, plusplus: false, sloppy: true, eqeq: true, white: true, css: false, nomen: false, regexp: true, maxerr: 100, indent: 4 */
+
 if (!Array.prototype.indexOf) {
     Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
         "use strict";
@@ -32,24 +35,24 @@ if (!Array.prototype.indexOf) {
             }
         }
         return -1;
-    }
+    };
 }
 
 var dde = {
     environment: {},
 
     push: function (args) {
-        var default_values = [false, '', 'default', '*'];
-        if (default_values.indexOf(args.host) !== -1) {
+        var search;
+        if (args.host === "*") {
             args.host = "default";
         }
         
-        if (this.commons !== undefined ) {
+        if (this.commons !== undefined)  {
             args.settings = this.merge(this.commons, args.settings);
         }
 
         if (document.location.search.length > 0) {
-            var search = this.jsonify(document.location.search.replace("?", ""));
+            search = this.jsonify(document.location.search.replace("?", ""));
             args.settings = this.merge(args.settings, search);
         }
 
@@ -60,8 +63,8 @@ var dde = {
         };
     },
     work: function (callback) {
-        var host = document.location.host;
-        var env;
+        var host, env;
+        host = document.location.host;
 
         if (this.environment[host] !== undefined) {
             env = this.environment[host];
@@ -72,17 +75,45 @@ var dde = {
         dde.env = env;
         return env;
     },
+    /*
+    gatekeeper: {
+        dictionary: {},
+        save: function (name, condition) {
+            var value;
+            if (typeof condition === "function") {
+                value = condition();
+            } else {
+                value = condition;
+            }
+            this.dictionary[name] = condition;
+        },
+        run: function (name, callback) {
+            var condition;
+            condition = this.dictionary[name];
+            if (condition !== undefined && typeof callback === "function") {
+                if (condition) {
+                    callback(name, condition);
+                }
+            }
+        }
+    },
+    */
     merge: function (obj1, obj2) {
-        var obj3 = {};
-        for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
-        for (attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+        var obj3, attrname;
+        obj3 = {};
+        for (attrname in obj1) {
+            obj3[attrname] = obj1[attrname];
+        }
+        for (attrname in obj2) {
+            obj3[attrname] = obj2[attrname];
+        }
         return obj3;
     },
     jsonify: function (message) {
-        var data = {};
-        var d = message.split("&");
-        var pair, key, value;
-        for (var i = 0, len = d.length; i < len; i++) {
+        var data, d, pair, key, value, i;
+        data = {};
+        d = message.split("&");
+        for (i = 0, len = d.length; i < len; i++) {
             pair = d[i];
             key = pair.substring(0, pair.indexOf("="));
             value = pair.substring(key.length + 1);
