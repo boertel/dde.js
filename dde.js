@@ -5,39 +5,6 @@
 
 /*jslint browser: true, undef: false, evil: false, plusplus: false, sloppy: true, eqeq: true, white: true, css: false, nomen: false, regexp: true, maxerr: 100, indent: 4 */
 
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
-        "use strict";
-        if (this === null) {
-            throw new TypeError();
-        }
-        var t = Object(this);
-        var len = t.length >>> 0;
-        if (len === 0) {
-            return -1;
-        }
-        var n = 0;
-        if (arguments.length > 0) {
-            n = Number(arguments[1]);
-            if (n != n) { // shortcut for verifying if it's NaN
-                n = 0;
-            } else if (n !== 0 && n != Infinity && n != -Infinity) {
-                n = (n > 0 || -1) * Math.floor(Math.abs(n));
-            }
-        }
-        if (n >= len) {
-            return -1;
-        }
-        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-        for (; k < len; k++) {
-            if (k in t && t[k] === searchElement) {
-                return k;
-            }
-        }
-        return -1;
-    };
-}
-
 var dde = {
     environment: {},
 
@@ -75,29 +42,6 @@ var dde = {
         dde.env = env;
         return env;
     },
-    /*
-    gatekeeper: {
-        dictionary: {},
-        save: function (name, condition) {
-            var value;
-            if (typeof condition === "function") {
-                value = condition();
-            } else {
-                value = condition;
-            }
-            this.dictionary[name] = condition;
-        },
-        run: function (name, callback) {
-            var condition;
-            condition = this.dictionary[name];
-            if (condition !== undefined && typeof callback === "function") {
-                if (condition) {
-                    callback(name, condition);
-                }
-            }
-        }
-    },
-    */
     merge: function (obj1, obj2) {
         var obj3, attrname;
         obj3 = {};
@@ -128,3 +72,36 @@ var dde = {
     }
 };
 window.ddeAsyncInit && window.ddeAsyncInit();
+
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
+        "use strict";
+        if (this === null) {
+            throw new TypeError();
+        }
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = 0;
+        if (arguments.length > 0) {
+            n = Number(arguments[1]);
+            if (n != n) { // shortcut for verifying if it's NaN
+                n = 0;
+            } else if (n !== 0 && n != Infinity && n != -Infinity) {
+                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+            }
+        }
+        if (n >= len) {
+            return -1;
+        }
+        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+        for (; k < len; k++) {
+            if (k in t && t[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+    };
+}
