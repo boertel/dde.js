@@ -6,11 +6,10 @@
 
 <body>
 
-<div id="giveaway"></div>
 
 <script type="text/javascript">
 window.ddeAsyncInit = function () {
-    dde.commons = {
+    dde.common = {
         display: "tab",
         language: "fr-fr"
     };
@@ -42,7 +41,8 @@ window.ddeAsyncInit = function () {
     });
 
     var env = dde.work();
-    console.log(dde);
+    dde.log(dde);
+    document.title = "(" + dde.env.name + ") dde.js";
 };
 
 (function() {

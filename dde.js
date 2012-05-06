@@ -1,107 +1,108 @@
-/* Author: Benjamin Oertel (ben@punchtab.com)
- * Description: match a specific host with a specific configuration
- * Date: 01/01/2012
+/**
+ * @author: Benjamin Oertel (ben@punchtab.com)
+ * @description: match a specific host with a specific configuration
+ * and it's named after the famous french DDE (public company in charge of the road maintenance)
+ * 1 qui travaille, 3 qui regardent
+ *
+ * @date: 01/01/2012
  */
 
 /*jslint browser: true, undef: false, evil: false, plusplus: false, sloppy: true, eqeq: true, white: true, css: false, nomen: false, regexp: true, maxerr: 100, indent: 4 */
 
-var dde = {
-    environment: {},
+(function (window, undefined) {
+    "dde:nomunge";
 
-    push: function (args) {
-        var search;
-        if (args.host === "*") {
-            args.host = "default";
-        }
-        
-        if (this.commons !== undefined)  {
-            args.settings = this.merge(this.commons, args.settings);
-        }
+    var priv, dde;
 
-        if (document.location.search.length > 0) {
-            search = this.jsonify(document.location.search.replace("?", ""));
-            args.settings = this.merge(args.settings, search);
-        }
-
-        this.environment[args.host] = {
-            host: args.host,
-            name: args.name || args.host,
-            settings: args.settings
-        };
-    },
-    work: function (callback) {
-        var host, env;
-        host = document.location.host;
-
-        if (this.environment[host] !== undefined) {
-            env = this.environment[host];
-        } else {
-            env = this.environment["default"];
-        }
-
-        dde.env = env;
-        return env;
-    },
-    merge: function (obj1, obj2) {
-        var obj3, attrname;
-        obj3 = {};
-        for (attrname in obj1) {
-            obj3[attrname] = obj1[attrname];
-        }
-        for (attrname in obj2) {
-            obj3[attrname] = obj2[attrname];
-        }
-        return obj3;
-    },
-    jsonify: function (message) {
-        var data, d, pair, key, value, i;
-        data = {};
-        d = message.split("&");
-        for (i = 0, len = d.length; i < len; i++) {
-            pair = d[i];
-            key = pair.substring(0, pair.indexOf("="));
-            value = pair.substring(key.length + 1);
-            data[key] = unescape(value);
-        }
-        return data;
-    },
-    log: function (args) {
-        if (window.console) {
-            window.console.log(args);
-        }
-    }
-};
-window.ddeAsyncInit && window.ddeAsyncInit();
-
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
-        "use strict";
-        if (this === null) {
-            throw new TypeError();
-        }
-        var t = Object(this);
-        var len = t.length >>> 0;
-        if (len === 0) {
-            return -1;
-        }
-        var n = 0;
-        if (arguments.length > 0) {
-            n = Number(arguments[1]);
-            if (n != n) { // shortcut for verifying if it's NaN
-                n = 0;
-            } else if (n !== 0 && n != Infinity && n != -Infinity) {
-                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+    priv = {
+        merge: function (obj1, obj2) {
+            var obj3, attrname;
+            obj3 = {};
+            for (attrname in obj1) {
+                obj3[attrname] = obj1[attrname];
             }
-        }
-        if (n >= len) {
-            return -1;
-        }
-        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-        for (; k < len; k++) {
-            if (k in t && t[k] === searchElement) {
-                return k;
+            for (attrname in obj2) {
+                obj3[attrname] = obj2[attrname];
             }
+            return obj3;
+        },
+        jsonify: function (message) {
+            var data, d, pair, key, value, i;
+            data = {};
+            d = message.split("&");
+            for (i = 0, len = d.length; i < len; i++) {
+                pair = d[i];
+                key = pair.substring(0, pair.indexOf("="));
+                value = pair.substring(key.length + 1);
+                data[key] = unescape(value);
+            }
+            return data;
         }
-        return -1;
     };
-}
+
+    dde = {
+        version: "0.0.2",
+        environment: {},
+        common: {},
+
+        /**
+         * Create a new environment
+         * @param args.host     {string}    host. Use "*" as wildcard
+         * @param [args.name]   {string}    name, if not defined, it uses the host as name.
+         * @param args.settings {object}    settings for this environment
+         */
+        push: function (args) {
+            var search;
+            if (args.host === "*") {
+                args.host = "default";
+            }
+            
+            // Priority: GET parameters > environment settings > common settings
+            args.settings = priv.merge(this.common, args.settings);
+
+            if (document.location.search.length > 0) {
+                search = priv.jsonify(document.location.search.replace("?", ""));
+                args.settings = priv.merge(args.settings, search);
+            }
+
+            this.environment[args.host] = {
+                host: args.host,
+                name: args.name || args.host,
+                settings: args.settings
+            };
+        },
+
+        /**
+         * Get the correct environment and put it in dde.env. If there is no environment matching the current host
+         * it returns the default one (defined with the wildcard "*")
+         * @param callback {function} TODO
+         * @return {object} environment
+         */
+        work: function (callback) {
+            var host, env;
+            host = document.location.host;
+
+            if (this.environment[host] !== undefined) {
+                env = this.environment[host];
+            } else {
+                env = this.environment["default"];
+            }
+
+            dde.env = env;
+            return env;
+        },
+        
+        /**
+         * log function that logs only with it's safe
+         * meaning window.console available
+         */
+        log: function () {
+            window.console && window.console.log(arguments);
+        }
+    };
+
+    window.dde = dde;
+
+    window.ddeAsyncInit && window.ddeAsyncInit();
+
+})(window);
