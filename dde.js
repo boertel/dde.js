@@ -47,6 +47,7 @@
 
         /**
          * Create a new environment
+         *
          * @param args.host     {string}    host. Use "*" as wildcard
          * @param [args.name]   {string}    name, if not defined, it uses the host as name.
          * @param args.settings {object}    settings for this environment
@@ -75,6 +76,7 @@
         /**
          * Get the correct environment and put it in dde.env. If there is no environment matching the current host
          * it returns the default one (defined with the wildcard "*")
+         *
          * @param callback {function} TODO
          * @return {object} environment
          */
@@ -101,8 +103,15 @@
         }
     };
 
-    window.dde = dde;
+    dde._q = window.dde._q;
+    dde.ready = function (callback) {
+        callback(dde);
+    };
 
-    window.ddeAsyncInit && window.ddeAsyncInit();
+    while (dde._q.length > 0) {
+        dde.ready(dde._q.shift());
+    }
+
+    window.dde = dde;
 
 })(window);

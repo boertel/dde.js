@@ -6,9 +6,16 @@
 
 <body>
 
+<script>
+window.dde = (function(d) {
+    var s = d.createElement('script'); s.src = "./dde.js";
+    var fs = d.getElementsByTagName('script')[0]; fs.parentNode.insertBefore(s, fs);
+    return window.dde || (t = { _q: [], ready: function(f){ t._q.push(f) } });
+})(document);
+</script>
 
 <script type="text/javascript">
-window.ddeAsyncInit = function () {
+window.dde.ready(function (dde) {
     dde.common = {
         display: "tab",
         language: "fr-fr"
@@ -43,14 +50,10 @@ window.ddeAsyncInit = function () {
     var env = dde.work();
     dde.log(dde);
     document.title = "(" + dde.env.name + ") dde.js";
-};
-
-(function() {
-    var dde = document.createElement('script'); dde.type = 'text/javascript'; dde.async = true;
-    dde.src = "./dde.js";
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(dde, s);
-})();
+});
 </script>
+
+
 
 </body>
 </html>
