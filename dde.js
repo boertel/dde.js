@@ -103,7 +103,7 @@
         }
     };
 
-    dde._q = window.dde._q;
+    dde._q = window.dde ? window.dde._q : [];
     dde.ready = function (callback) {
         callback(dde);
     };
