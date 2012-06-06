@@ -1,10 +1,10 @@
 /**
- * @author: Benjamin Oertel (ben@punchtab.com)
- * @description: match a specific host with a specific configuration
+ * @author Benjamin Oertel (ben@punchtab.com)
+ * @description match a specific host with a specific configuration
  * and it's named after the famous french DDE (public company in charge of the road maintenance)
  * 1 qui travaille, 3 qui regardent
  *
- * @date: 01/01/2012
+ * @date 01/01/2012
  */
 
 /*jslint browser: true, undef: false, evil: false, plusplus: false, sloppy: true, eqeq: true, white: true, css: false, nomen: false, regexp: true, maxerr: 100, indent: 4 */
@@ -31,9 +31,9 @@
             data = {};
             d = message.split("&");
             for (i = 0, len = d.length; i < len; i++) {
-                pair = d[i];
-                key = pair.substring(0, pair.indexOf("="));
-                value = pair.substring(key.length + 1);
+                pair = d[i].split("=");
+                key = pair[0];
+                value = pair[1];
                 data[key] = unescape(value);
             }
             return data;
@@ -41,7 +41,7 @@
     };
 
     dde = {
-        version: "0.0.2",
+        version: "0.0.3",
         environment: {},
         common: {},
 
