@@ -104,21 +104,61 @@
 
 
         /**
-         * Asynchronous queue
+         * Event handling
          */
-        _queue: [],
-        ready: function (callback) {
-            this._queue.push(callback);
-        },
-        asyncInit: function () {
-            this.ready = function (callback) {
-                callback();
-            };
-            while (this._queue.length > 0) {
-                this.ready(this._queue.shift());
+        event: {
+            bind: function (type, callback) {
+                this._init = this._init || {};
+                this._listeners = this._listeners || {};
+                this._listeners[type] = this._listeners[type] || [];
+
+                if (!this._init[type]) {
+                    this._listeners[type].push(callback);
+                } else {
+                    callback(this._init[type]);
+                }
+            },
+            unbind: function (type, callback) {
+                var listeners, d;
+                listeners = this._listeners[type];
+                if (listeners) {
+                    if (callback) {
+                        do {
+                            d = listeners.indexOf(callback);
+                            if (d >= 0) {
+                                this._listeners[type].splice(d, 1);
+                            }
+                        } while (d >= 0);
+                    } else {
+                        this._listeners[type] = [];
+                    }
+                }
+            },
+            init: function (type, response) {
+                this.trigger(type, response, true);
+            },
+            trigger: function (type, response, init) {
+                var listeners, i;
+
+                this._init = this._init || {};
+                this._listeners = this._listeners || {};
+                listeners = this._listeners[type] || [];
+                this._init[type] = (init !== undefined && init !== false);
+
+                if (!this._init[type]) {
+                    for (i = 0; i < listeners.length; i += 1) {
+                        listeners[i].call(this, response);
+                    }
+                } else {
+                    this._init[type] = response || true;
+                    while (listeners.length > 0) {
+                        callback = listeners.shift();
+                        callback(response);
+                    }
+                }
             }
-            
         }
+
     };
 
     window.dde = dde;

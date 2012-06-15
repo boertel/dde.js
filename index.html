@@ -45,19 +45,28 @@ dde.log(dde);
 document.title = "(" + dde.env.name + ") dde.js";
 
 
-// Asynchronous queue:
-dde.ready(function () {
-    console.log("dde.ready() #1");
+// Event
+dde.event.bind('ready', function (response) {
+    console.log("dde.event.ready #1", response);
 });
-
-dde.ready(function () {
-    console.log("dde.ready() #2");
+dde.event.bind('ready', function (response) {
+    console.log("dde.event.ready #2", response);
 });
+var third = function (response) {
+    console.log("dde.event.ready #3", response);
+};
+dde.event.bind('ready', third);
 
-dde.asyncInit();
+console.log("trigger");
+dde.event.trigger('ready', "first event");
 
-dde.ready(function () {
-    console.log("dde.ready() #3");
+dde.event.unbind('ready', third);
+
+console.log("ready");
+dde.event.init('ready', {init: true});
+
+dde.event.bind('ready', function (response) {
+    console.log("dde.event.ready #4", response);
 });
 
 
