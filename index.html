@@ -6,51 +6,61 @@
 
 <body>
 
-<script>
-window.dde = (function(d) {
-    var s = d.createElement('script'); s.src = "./dde.js";
-    var fs = d.getElementsByTagName('script')[0]; fs.parentNode.insertBefore(s, fs);
-    return window.dde || (t = { _q: [], ready: function(f){ t._q.push(f) } });
-})(document);
-</script>
+<script src="dde.js"></script>
 
 <script>
-window.dde.ready(function (dde) {
-    dde.common = {
-        display: "tab",
-        language: "fr-fr"
-    };
+dde.common = {
+    display: "tab",
+    language: "fr-fr"
+};
 
-    dde.push({
-        host: "127.0.0.1",
-        name: "dev",
-        settings: {
-            key: "abcdef",
-            domain: "127.0.0.1"
-        }
-    });
-    dde.push({
-        host: "test.punchtab.com",
-        name: "test",
-        settings: {
-            key: "ghijkl",
-            domain: "test.punchtab.com",
-            display: "inline"
-        }
-    });
-    dde.push({
-        host: "*",
-        name: "prod",
-        settings: {
-            key: "",
-            domain: "punchtab.com"
-        }
-    });
-
-    var env = dde.work();
-    dde.log(dde);
-    document.title = "(" + dde.env.name + ") dde.js";
+dde.push({
+    host: "127.0.0.1",
+    name: "dev",
+    settings: {
+        key: "abcdef",
+        domain: "127.0.0.1"
+    }
 });
+dde.push({
+    host: "test.punchtab.com",
+    name: "test",
+    settings: {
+        key: "ghijkl",
+        domain: "test.punchtab.com",
+        display: "inline"
+    }
+});
+dde.push({
+    host: "*",
+    name: "prod",
+    settings: {
+        key: "",
+        domain: "punchtab.com"
+    }
+});
+
+var env = dde.work();
+dde.log(dde);
+document.title = "(" + dde.env.name + ") dde.js";
+
+
+// Asynchronous queue:
+dde.ready(function () {
+    console.log("dde.ready() #1");
+});
+
+dde.ready(function () {
+    console.log("dde.ready() #2");
+});
+
+dde.asyncInit();
+
+dde.ready(function () {
+    console.log("dde.ready() #3");
+});
+
+
 </script>
 
 

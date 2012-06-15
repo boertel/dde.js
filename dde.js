@@ -41,7 +41,7 @@
     };
 
     dde = {
-        version: "0.0.3",
+        version: "0.0.4",
         environment: {},
         common: {},
 
@@ -100,17 +100,26 @@
          */
         log: function () {
             window.console && window.console.log(arguments);
+        },
+
+
+        /**
+         * Asynchronous queue
+         */
+        _queue: [],
+        ready: function (callback) {
+            this._queue.push(callback);
+        },
+        asyncInit: function () {
+            this.ready = function (callback) {
+                callback();
+            };
+            while (this._queue.length > 0) {
+                this.ready(this._queue.shift());
+            }
+            
         }
     };
-
-    dde._q = window.dde ? window.dde._q : [];
-    dde.ready = function (callback) {
-        callback(dde);
-    };
-
-    while (dde._q.length > 0) {
-        dde.ready(dde._q.shift());
-    }
 
     window.dde = dde;
 
