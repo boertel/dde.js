@@ -1,6 +1,9 @@
 /**
- * @author Benjamin Oertel (ben@punchtab.com)
- * @description match a specific host with a specific configuration
+ * @author Benjamin Oertel (benjamin.oertel@gmail.com)
+ * @description
+ *      - prioritize your settings: GET parameters > environment settings > default settings 
+ *      - match a specific environment with a hostname
+ *
  * and it's named after the famous french DDE (public company in charge of the road maintenance)
  * 1 qui travaille, 3 qui regardent
  *
@@ -9,12 +12,12 @@
 
 /*jslint browser: true, undef: false, evil: false, plusplus: false, sloppy: true, eqeq: true, white: true, css: false, nomen: false, regexp: true, maxerr: 100, indent: 4 */
 
-(function (window, undefined) {
+(function (window, document, undefined) {
     "dde:nomunge";
 
-    var priv, dde;
+    var util, dde;
 
-    priv = {
+    util = {
         merge: function (obj1, obj2) {
             var obj3, attrname;
             obj3 = {};
@@ -26,7 +29,7 @@
             }
             return obj3;
         },
-        jsonify: function (message) {
+        parse: function (message) {
             var data, d, pair, key, value, i;
             data = {};
             d = message.split("&");
@@ -37,13 +40,58 @@
                 data[key] = unescape(value);
             }
             return data;
+        },
+        dotToObject: function (name, value) {
+            var ns,
+                node = {};
+                namespaces = name.split("."),
+                len = namespaces.length;
+
+            for (var i = 0; i < len; i += 1) {
+                var ns = namespaces[i]; 
+                var nso = node[ns];
+                if (nso === undefined) {
+                    nso = (value && i + 1 === len) ? value : {};
+                    node[ns] = nso;
+                }
+                node = nso
+            }
+            return value;
         }
     };
 
     dde = {
-        version: "0.0.4",
+        version: "0.0.5",
         environment: {},
-        common: {},
+        _default: {},
+        _env: undefined,
+        _parameters: undefined,
+
+        _prefix: "dde_",    // prefix of the GET parameters
+
+        /**
+         *
+         *
+         */
+        _search: function (search) {
+            var namespace, key, value,
+                prefixed = {},
+                that = this;
+
+            search = util.parse(search);
+            for (key in search) {
+                value = search[key];
+                if (key.search(that._prefix) === 0) {
+                    namespace = key.replace(that._prefix, '');
+                    prefixed = util.merge(prefixed, util.dotToObject(namespace, value));
+                }
+            }
+            return prefixed;
+        },
+
+        default: function (settings) {
+            this._default = settings;
+        },
 
         /**
          * Create a new environment
@@ -52,25 +100,20 @@
          * @param [args.name]   {string}    name, if not defined, it uses the host as name.
          * @param args.settings {object}    settings for this environment
          */
-        push: function (args) {
-            var search;
-            if (args.host === "*") {
-                args.host = "default";
+        push: function (settings, host) {
+            if (!host) {
+                host = "*";
             }
             
-            // Priority: GET parameters > environment settings > common settings
-            args.settings = priv.merge(this.common, args.settings);
+            // Priority: GET parameters > environment settings > default settings
+            settings = util.merge(this._default, settings);
 
-            if (document.location.search.length > 0) {
-                search = priv.jsonify(document.location.search.replace("?", ""));
-                args.settings = priv.merge(args.settings, search);
-            }
+            this._parameters = this._search(document.location.search.replace("?", ""));
+            settings = util.merge(settings, this._parameters);
 
-            this.environment[args.host] = {
-                host: args.host,
-                name: args.name || args.host,
-                settings: args.settings
-            };
+            this.environment[host] = settings;
+
+            return this;
         },
 
         /**
@@ -81,86 +124,44 @@
          * @return {object} environment
          */
         work: function (callback) {
-            var host, env;
-            host = document.location.host;
+            var env,
+                host = document.location.host;
 
             if (this.environment[host] !== undefined) {
                 env = this.environment[host];
             } else {
-                env = this.environment["default"];
+                env = this.environment["*"];
             }
 
-            dde.env = env;
-            return env;
-        },
-        
-        /**
-         * log function that logs only with it's safe
-         * meaning window.console available
-         */
-        log: function () {
-            window.console && window.console.log(arguments);
+            this._env = env;
+            return this;
         },
 
-
         /**
-         * Event handling
+         * access a setting and return undefined if it's not defined
+         *
+         * @params name {String}
+         * @return {Object} value corresponding to the setting name
          */
-        event: {
-            bind: function (type, callback) {
-                this._init = this._init || {};
-                this._listeners = this._listeners || {};
-                this._listeners[type] = this._listeners[type] || [];
+        get: function (name) {
+            var ns,
+                i = 0,
+                node = this.env;
+                namespaces = name.split("."),
+                len = namespaces.length;
 
-                if (!this._init[type]) {
-                    this._listeners[type].push(callback);
-                } else {
-                    callback(this._init[type]);
-                }
-            },
-            unbind: function (type, callback) {
-                var listeners, d;
-                listeners = this._listeners[type];
-                if (listeners) {
-                    if (callback) {
-                        do {
-                            d = listeners.indexOf(callback);
-                            if (d >= 0) {
-                                this._listeners[type].splice(d, 1);
-                            }
-                        } while (d >= 0);
-                    } else {
-                        this._listeners[type] = [];
-                    }
-                }
-            },
-            init: function (type, response) {
-                this.trigger(type, response, true);
-            },
-            trigger: function (type, response, init) {
-                var listeners, i;
-
-                this._init = this._init || {};
-                this._listeners = this._listeners || {};
-                listeners = this._listeners[type] || [];
-                this._init[type] = (init !== undefined && init !== false);
-
-                if (!this._init[type]) {
-                    for (i = 0; i < listeners.length; i += 1) {
-                        listeners[i].call(this, response);
-                    }
-                } else {
-                    this._init[type] = response || true;
-                    while (listeners.length > 0) {
-                        callback = listeners.shift();
-                        callback(response);
-                    }
-                }
+            while (i < len && node !== undefined) {
+                var ns = namespaces[i];
+                node = node[ns];
+                i += 1;
             }
+            return node;
+        },
+        set: function (name, value) {
+            
         }
-
     };
 
     window.dde = dde;
 
-})(window);
+})(window, document);
