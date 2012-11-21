@@ -98,6 +98,10 @@
 
         default: function (settings) {
             this._default = settings;
+
+            this.environment["*"] = this._default;
+
+            return this;
         },
 
         /**
@@ -115,7 +119,7 @@
             // Priority: GET parameters > environment settings > default settings
             settings = util.merge(this._default, settings);
 
-            this._parameters = this._search(document.location.search.replace("?", ""));
+            this._parameters = this._search(document.location.hash.replace("#", ""));
             settings = util.merge(settings, this._parameters);
 
             this.environment[host] = settings;
