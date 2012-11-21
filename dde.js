@@ -89,6 +89,13 @@
             return prefixed;
         },
 
+        _clean: function () {
+            this.environment = {};
+            this._default = {};
+            this._env = undefined;
+            this._parameters = undefined;
+        },
+
         default: function (settings) {
             this._default = settings;
         },
