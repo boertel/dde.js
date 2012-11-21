@@ -9,44 +9,95 @@
 <script src="dde.js"></script>
 
 <script>
-dde.default({
-    key: undefined,
-    language: undefined,
-    domain: document.location.hostname,
-    loyalty: {
-        activity: undefined,
-        notification: undefined,
-        bar: {
-            width: undefined,
-            notification: undefined
-        }
-    },
-    badges: {
+// define default settings
+dde.byDefault().use({
+    key: "1234567890",
+    log: {
+        info: true,
+        error: false
     }
 });
 
-var _settings = {
-    key: "1234567890"
-};
+// extend settings
+dde.on("*").use({
+    name: "*"
+});
 
-dde.push(_settings);
+// define settings for a specific domain
+dde.on("127.0.0.1").use({
+    domain: "127.0.0.1",
+    name: "dev"
+});
 
-dde.push({
-    key: "abcdef",
-    domain: "127.0.0.1"
-}, "127.0.0.1");
+dde.on("test.local").use({
+    domain: "test.local",
+    name: "test"
+});
 
-dde.push({
-    key: "ghijkl",
-    domain: "test.punchtab.com",
-    display: "inline"
-}, "test.punchtab.com");
 
-dde.work();
+// get a value
+console.log(dde.get("domain"), dde.get("domain") !== undefined);
+
+// Unexisting value
+console.log(dde.get("unknown"), dde.get("unknown") === undefined);
+
+// Nested value
+console.log(dde.get("log.info"), dde.get("log.info") !== undefined);
+
+// Unexisting nested value
+console.log(dde.get("log.warning"), dde.get("log.warning") === undefined);
+
 </script>
 
-
+<script type="text/javascript">
+dde.byDefault().use({
+    key: undefined,
+    debug: undefined,
+    language: undefined,
+    domain: document.location.hostname,
+    name: document.location.hostname,
+    unbrand: false,
+    internal: {
+        referrer: undefined
+    },
+    whitelabel: false,
+    installation: undefined,
+    loyalty: {
+        display: undefined,
+        position: {
+            x: "left",
+            y: "bottom"
+        },
+        notification: true,
+        activity: undefined,
+        defaultearning: undefined,
+        earningmap: true,
+        bar: {
+            width: undefined,
+            align: undefined,
+            notification: true,
+            backgroundColor: "#434343",
+            tweet: {
+                text: document.title
+            },
+            url: document.location.href
+        },
+        disable: undefined,
+        learnMore: undefined
+    },
+    badge: {
+        display: undefined,
+        position: {
+            x: "left",
+            y: "bottom"
+        },
+        notification: true,
+        locked_image: "",
+        disable: undefined,
+        learnMore: undefined
+    }
+});
+</script>
 
 </body>
 </html>
-
