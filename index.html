@@ -26,7 +26,10 @@ dde.on("*").use({
 // define settings for a specific domain
 dde.on("127.0.0.1").use({
     domain: "127.0.0.1",
-    name: "dev"
+    name: "dev",
+    log: {
+        info: false
+    }
 });
 
 dde.on("test.local").use({
@@ -36,20 +39,20 @@ dde.on("test.local").use({
 
 
 // get a value
-console.log(dde.get("domain"), dde.get("domain") !== undefined);
+console.log("domain", dde.get("domain"), dde.get("domain") !== undefined);
 
 // Unexisting value
-console.log(dde.get("unknown"), dde.get("unknown") === undefined);
+console.log("unknown", dde.get("unknown"), dde.get("unknown") === undefined);
 
 // Nested value
-console.log(dde.get("log.info"), dde.get("log.info") !== undefined);
+console.log("log.info", dde.get("log.info"), dde.get("log.info") !== undefined);
 
 // Unexisting nested value
-console.log(dde.get("log.warning"), dde.get("log.warning") === undefined);
+console.log("log.warning", dde.get("log.warning"), dde.get("log.warning") === undefined);
 
 </script>
 
-<script type="text/javascript">
+<!--script type="text/javascript">
 dde.byDefault().use({
     key: undefined,
     debug: undefined,
@@ -97,7 +100,7 @@ dde.byDefault().use({
         learnMore: undefined
     }
 });
-</script>
+</script-->
 
 </body>
 </html>

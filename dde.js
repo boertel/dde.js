@@ -15,19 +15,28 @@
 (function (window, document, undefined) {
     "dde:nomunge";
 
-    var util,
-        dde,
+    var util, dde,
         defaultHost = "*";
 
     util = {
         merge: function (obj1, obj2) {
-            var obj3, attrname;
-            obj3 = {};
-            for (attrname in obj1) {
-                obj3[attrname] = obj1[attrname];
+            var obj3 = {};
+            for (var p in obj1) {
+                obj3[p] = obj1[p];
             }
-            for (attrname in obj2) {
-                obj3[attrname] = obj2[attrname];
+
+            for (var p in obj2) {
+                try {
+                    // Property in destination object set; update its value.
+                    if (obj2[p].constructor==Object ) {
+                        obj3[p] = util.merge(obj3[p], obj2[p]);
+                    } else {
+                        obj3[p] = obj2[p];
+                    }
+                } catch(e) {
+                    // Property in destination object not set; create it and set its value.
+                    obj3[p] = obj2[p];
+                }
             }
             return obj3;
         },
@@ -125,7 +134,6 @@
             this._defineEnv();
             return this;
         },
-
         get: function (name) {
             var ns,
                 i = 0,
