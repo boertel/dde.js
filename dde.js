@@ -51,35 +51,13 @@
                 data[key] = unescape(value);
             }
             return data;
-        },
-        dotToObject: function (name, value) {
-            var ns,
-                node = {};
-                namespaces = name.split("."),
-                len = namespaces.length;
-
-            for (var i = 0; i < len; i += 1) {
-                var ns = namespaces[i]; 
-                var nso = node[ns];
-                if (nso === undefined) {
-                    nso = (value && i + 1 === len) ? value : {};
-                    node[ns] = nso;
-                }
-                node = nso
-            }
-            return value;
         }
     };
 
     dde = {
         version: "0.0.5",
 
-        _environment: {},
-        _default: {},
-        _env: undefined,
-        _parameters: undefined,
-
-        _prefix: "dde_",    // prefix of the GET parameters
+        prefix: "dde_",    // prefix of the GET parameters
 
         _hash: function (search) {
             var namespace, key, value,
@@ -88,30 +66,36 @@
             search = util.parse(search);
             for (key in search) {
                 value = search[key];
-                if (key.search(this._prefix) === 0) {
-                    namespace = key.replace(this._prefix, '');
+                if (key.search(this.prefix) === 0) {
+                    namespace = key.replace(this.prefix, '');
                     value = (value === "true") ? true : (value === "false") ? false : value;
-                    prefixed[namespace] = util.dotToObject(namespace, value);
+                    this.set(namespace, value);
                 }
             }
-            return prefixed;
         },
-        _clean: function () {
-            this._environment = {};
-            this._default = undefined;
-            this._env = undefined;
-            this._parameters = undefined;
-        },
-        _defineEnv: function () {
-            var hostname = document.location.hostname,
+        _define: function (domain) {
+            var env,
+                hostname = domain || document.location.hostname;
+
+            if (!this._env[hostname]) {
                 env = this._environment[hostname] ? this._environment[hostname] : this._environment[defaultHost];
 
-            this._parameters = this._hash(document.location.hash.replace("#", ""));
-            this._env = util.merge(env, this._parameters);
+                this._hash(document.location.hash.replace("#", ""));
+                env = util.merge(env, this._parameters);
+                env = util.merge(this._default, env);
 
-            return this._env;
+                this._env[hostname] = env;
+            }
+            return this._env[hostname];
         },
 
+        init: function () {
+            this._default = undefined;
+            this._environment = {};
+            this._parameters = {};
+
+            this._env = {};
+        },
         byDefault: function () {
             this._isDefault = true;
             return this;
@@ -126,20 +110,21 @@
             }
 
             var domain = this._isOn || defaultHost;
-            this._environment[domain] = util.merge(this._default, settings);
+            this._environment[domain] = settings;
 
             delete this._isDefault;
             delete this._isOn;
 
-            this._defineEnv();
             return this;
         },
         get: function (name) {
             var ns,
                 i = 0,
-                node = this._defineEnv(),
-                namespaces = name.split("."),
+                node = this._define(this._isOn),
+                namespaces = (name !== undefined) ? name.split(".") : [],
                 len = namespaces.length;
+
+            delete this._isOn;
 
             while (i < len && node !== undefined) {
                 var ns = namespaces[i];
@@ -149,9 +134,25 @@
             return node;
         },
         set: function (name, value) {
+            var ns,
+                node = this._parameters,
+                namespaces = name.split("."),
+                len = namespaces.length;
+
+            for (var i = 0; i < len; i += 1) {
+                var ns = namespaces[i]; 
+                var nso = node[ns];
+                if (nso === undefined) {
+                    nso = (value && i + 1 === len) ? value : {};
+                    node[ns] = nso;
+                }
+                node = nso;
+            }
+            return node;
         }
     };
 
+    dde.init();
     window.dde = dde;
 
 })(window, document);

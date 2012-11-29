@@ -1,12 +1,12 @@
 describe("Event Library", function () {
     beforeEach(function () {
-        dde._clean()
+        dde.init()
 
         // Check that the clean did its work otherwise tests
         // can be messed up.
         expect(dde._default).toEqual(undefined);
         expect(dde._env).toEqual(undefined);
-        expect(dde._parameters).toEqual(undefined);
+        //expect(dde._parameters).toEqual(jasmine.any.object());
         
         _default = {a: 1, b: 2};
         _defaultObject = {a: {inside: true}, b: 2};
@@ -86,6 +86,12 @@ describe("Event Library", function () {
                 }
             });
 
+            it("get the all environment", function () {
+                dde.byDefault().use(_default);
+
+                expect(dde.get()).toEqual(_default);
+            });
+
             it("1 environment overwriting 1 default setting", function () {
                 dde.byDefault().use(_default);
 
@@ -161,6 +167,7 @@ describe("Event Library", function () {
             beforeEach(function () {
                 _hash = "#dde_c=3&dde_d=4";
                 _hashOverwrite = "#dde_a=overwritten&dde_c=4";
+                _hashNested = "#dde_a.c=5";
             });
 
             afterEach(function () {
@@ -180,6 +187,15 @@ describe("Event Library", function () {
 
                 expect(dde.get("a")).not.toEqual(_default.a);
                 expect(dde.get("a")).toEqual("overwritten");
+            });
+
+            it("nested value", function () {
+                document.location.hash = _hashNested;
+
+                dde.byDefault().use(_default);
+
+                expect(dde.get("a.c")).toEqual("5");
+
             });
         });
 

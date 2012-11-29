@@ -45,7 +45,7 @@ console.log("domain", dde.get("domain"), dde.get("domain") !== undefined);
 console.log("unknown", dde.get("unknown"), dde.get("unknown") === undefined);
 
 // Nested value
-console.log("log.info", dde.get("log.info"), dde.get("log.info") !== undefined);
+console.log("log.info", dde.get("log.info"), dde.get("log.info") === false);
 
 // Unexisting nested value
 console.log("log.warning", dde.get("log.warning"), dde.get("log.warning") === undefined);
