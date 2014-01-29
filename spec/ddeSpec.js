@@ -1,13 +1,9 @@
 describe("Event Library", function () {
     beforeEach(function () {
-        dde.init()
-
         // Check that the clean did its work otherwise tests
         // can be messed up.
-        expect(dde._default).toEqual(undefined);
-        expect(dde._env).toEqual(undefined);
-        //expect(dde._parameters).toEqual(jasmine.any.object());
-        
+        dde.clean();
+
         _default = {a: 1, b: 2};
         _defaultObject = {a: {inside: true}, b: 2};
 
@@ -39,13 +35,11 @@ describe("Event Library", function () {
 
         describe("default settings are empty:", function () {
             it("basic", function () {
-                dde.byDefault().use({});
+                dde.on("*").use({});
             });
 
             it("1 environment", function () {
-                dde.byDefault().use({});
-
-                dde.use(_simple);
+                dde.on("*").use(_simple);
 
                 for (var key in _simple) {
                     expect(dde.get(key)).toEqual(_simple[key]);
@@ -53,7 +47,7 @@ describe("Event Library", function () {
             });
 
             it("default settings are not defined", function () {
-                dde.use(_simple);
+                dde.on("*").use(_simple);
 
                 for (var key in _simple) {
                     expect(dde.get(key)).toEqual(_simple[key]);
@@ -63,7 +57,7 @@ describe("Event Library", function () {
 
         describe("default settings is a simple object:", function () {
             it("set default settings", function () {
-                dde.byDefault().use(_default);
+                dde.on("*").use(_default);
 
                 for (var key in _default) {
                     expect(dde.get(key)).toEqual(_default[key]);
@@ -73,9 +67,9 @@ describe("Event Library", function () {
             it("1 environment", function () {
                 var key;
 
-                dde.byDefault().use(_default);
+                dde.on("*").use(_default);
 
-                dde.use(_simple);
+                dde.on("127.0.0.1").use(_simple);
 
                 for (key in _default) {
                     expect(dde.get(key)).toEqual(_default[key]);
@@ -87,15 +81,15 @@ describe("Event Library", function () {
             });
 
             it("get the all environment", function () {
-                dde.byDefault().use(_default);
+                dde.on("*").use(_default);
 
                 expect(dde.get()).toEqual(_default);
             });
 
             it("1 environment overwriting 1 default setting", function () {
-                dde.byDefault().use(_default);
+                dde.on("*").use(_default);
 
-                dde.use(_overwrite);
+                dde.on("127.0.0.1").use(_overwrite);
 
                 expect(dde.get("a")).not.toEqual(_default["a"]);
                 expect(dde.get("a")).toEqual(_overwrite["a"]);
@@ -103,13 +97,13 @@ describe("Event Library", function () {
         });
 
         describe("default settings are a nested object:", function () {
-            
+
             it("1 environment", function () {
                 var key;
 
-                dde.byDefault().use(_defaultObject);
+                dde.on("*").use(_defaultObject);
 
-                dde.use(_simple);
+                dde.on("127.0.0.1").use(_simple);
 
                 for (key in _defaultObject) {
                     expect(dde.get(key)).toEqual(_defaultObject[key]);
@@ -121,13 +115,13 @@ describe("Event Library", function () {
             });
 
             it("get nested value", function () {
-                dde.byDefault().use(_defaultObject);
+                dde.on("*").use(_defaultObject);
 
                 expect(dde.get("a.inside")).toEqual(true);
             });
 
             it("get nested value that don't exist", function () {
-                dde.byDefault().use(_defaultObject);
+                dde.on("*").use(_defaultObject);
 
                 expect(dde.get("a.outsite")).toEqual(undefined);
             });
@@ -135,9 +129,9 @@ describe("Event Library", function () {
             it("1 environment with objects", function () {
                 var key;
 
-                dde.byDefault().use(_defaultObject);
+                dde.on("*").use(_defaultObject);
 
-                dde.use(_simpleObject);
+                dde.on("127.0.0.1").use(_simpleObject);
 
                 for (key in _default) {
                     expect(dde.get(key)).toEqual(_defaultObject[key]);
@@ -151,9 +145,9 @@ describe("Event Library", function () {
             it("1 environment with objects overwriting the default ones", function () {
                 var key;
 
-                dde.byDefault().use(_defaultObject);
+                dde.on("*").use(_defaultObject);
 
-                dde.use(_overwriteObject);
+                dde.on("127.0.0.1").use(_overwriteObject);
 
                 expect(dde.get("a")).not.toEqual(_defaultObject.a);
 
@@ -183,7 +177,7 @@ describe("Event Library", function () {
             it("overwrite settings", function () {
                 document.location.hash = _hashOverwrite;
 
-                dde.byDefault().use(_default);
+                dde.on("*").use(_default);
 
                 expect(dde.get("a")).not.toEqual(_default.a);
                 expect(dde.get("a")).toEqual("overwritten");
@@ -192,7 +186,7 @@ describe("Event Library", function () {
             it("nested value", function () {
                 document.location.hash = _hashNested;
 
-                dde.byDefault().use(_default);
+                dde.on("*").use(_default);
 
                 expect(dde.get("a.c")).toEqual("5");
 

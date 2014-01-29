@@ -9,15 +9,6 @@
 <script src="dde.js"></script>
 
 <script>
-// define default settings
-dde.byDefault().use({
-    key: "1234567890",
-    log: {
-        info: true,
-        error: false
-    }
-});
-
 // extend settings
 dde.on("*").use({
     name: "*"
@@ -53,7 +44,7 @@ console.log("log.warning", dde.get("log.warning"), dde.get("log.warning") === un
 </script>
 
 <!--script type="text/javascript">
-dde.byDefault().use({
+dde.on("*").use({
     key: undefined,
     debug: undefined,
     language: undefined,
